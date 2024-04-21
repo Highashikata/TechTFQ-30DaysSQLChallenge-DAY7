@@ -50,3 +50,39 @@ FROM
 	DAY_INDICATOR) x
 WHERE Flag = 'Include';
 
+
+
+/* Solution 2 using ROW_NUMBER */
+
+
+
+select 
+  product_id, 
+  day_indicator, 
+  dates 
+from 
+  (
+    select 
+      *, 
+      row_number() over (
+        partition by product_id 
+        order by 
+          dates
+      ) rn, 
+      case when substring(
+        day_indicator, 
+        cast(
+          row_number() over (
+            partition by product_id 
+            order by 
+              dates
+          ) as int
+        ), 
+        1
+      ) = '1' then 'include' else 'exclude' end as flag 
+    from 
+      Day_Indicator
+  ) x 
+where 
+  flag = 'include';
+
